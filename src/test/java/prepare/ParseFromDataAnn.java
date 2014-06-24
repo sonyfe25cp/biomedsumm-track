@@ -6,10 +6,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import model.Citantion;
 import model.Instance;
 import model.Paper;
+import model.PaperInstance;
+import model.SummaryInstance;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -20,7 +23,8 @@ public class ParseFromDataAnn {
 
 	public static void main(String[] args) {
 		ParseFromDataAnn pfda = new ParseFromDataAnn();
-		pfda.batch();
+		String rootPath = "/Users/omar/data/TAC_2014_BiomedSumm_Training_Data/data";
+		pfda.batchParse(rootPath);
 	}
 	
 	/**
@@ -28,16 +32,20 @@ public class ParseFromDataAnn {
 	 * @param folder
 	 * @return
 	 */
-	public List<List<Instance>> batchParse(String dataPath){
-		List<List<Instance>> groups = new ArrayList<>();
+	public List<Instance> batchParse(String dataPath){//data
+		List<Instance> instances = new ArrayList<>();
 		File rootFolder = new File(dataPath);
-		for(File subFolder : rootFolder.listFiles()){
-			List<Instance> group = new ArrayList<>();
-			for(File diffFolder : subFolder.listFiles()){
+		for(File subFolder : rootFolder.listFiles()){//tran1
+			if(subFolder.isFile()){
+				continue;
+			}
+			List<List<Citantion>> newGroups = new ArrayList<>();
+			Map<String, String> summaries = null;
+			Map<String, Paper> papers = null;
+			List<List<Citantion>> originGroups = new ArrayList<>();
+			String topicId = subFolder.getName();//任务号
+			for(File diffFolder : subFolder.listFiles()){//summary,pdf,ann,
 				String folderName = diffFolder.getName();
-				List<MergeSummary> summaries;
-				List<Paper> papers;
-				List<List<Citantion>> originGroups = new ArrayList<>(subFolder.list().length);
 				switch(folderName){
 				case "Annotation":
 					for(File differentPersonAnn : diffFolder.listFiles()){
@@ -55,28 +63,84 @@ public class ParseFromDataAnn {
 					break;
 				}
 			}
+			//regroup citantion
+			Map<String, List<Citantion>> eachCPCitantions = new HashMap<>();
+			for(List<Citantion> citantions : originGroups){
+				for(Citantion citantion : citantions){
+					String key = citantion.getCP().fileName+"-"+citantion.getRP().fileName+"-"+citantion.citanceNumber;
+					List<Citantion> current = eachCPCitantions.get(key);
+					if(current == null){
+						current = new ArrayList<>();
+					}
+					current.add(citantion);
+					eachCPCitantions.put(key, current);//按照cp-rp-num 分组，把不同人的放到list中
+				}
+			}
 			
+			Instance instance = new Instance();
+			List<PaperInstance> paperInstances = new ArrayList<>();
+			for(Entry<String, List<Citantion>> entry :eachCPCitantions.entrySet()){
+				String key = entry.getKey();
+				List<Citantion> citantions = entry.getValue();
+				logger.info("key : {}, citantions size : {}", key, citantions.size());
+
+				PaperInstance paperInstance = new PaperInstance();
+				paperInstance.citantions = citantions;
+				paperInstance.citantionNumber = citantions.get(0).citanceNumber;
+				String rpFile = citantions.get(0).RP.fileName;
+				Paper rp = papers.get(rpFile);
+				paperInstance.RP = rp;
+				paperInstances.add(paperInstance);
+				newGroups.add(citantions);
+			}
+			instance.paperInstances = paperInstances;
+			System.err.println(newGroups.size());
+			
+			List<SummaryInstance> summaryInstances = new ArrayList<>();
+			for(List<Citantion> citantions : originGroups){
+				SummaryInstance summaryInstance = new SummaryInstance();
+				summaryInstance.annotator = citantions.get(0).annotator;
+				summaryInstance.citantions = citantions;
+				String rpName = citantions.get(0).RP.fileName;
+				summaryInstance.RP = papers.get(rpName);
+				List<Paper> cps = new ArrayList<>();
+				for(Citantion ci : citantions){
+					String cpFile = ci.CP.fileName;
+					Paper cp = papers.get(cpFile);
+					cps.add(cp);
+				}
+				summaryInstance.CPs = cps;
+				String summaryKey = generateSummaryKey(topicId, summaryInstance.annotator);
+				String summary = summaries.get(summaryKey);
+				summaryInstance.summary = summary;
+				summaryInstances.add(summaryInstance);
+			}
+			
+			instance.summaryInstances = summaryInstances;
+			instances.add(instance);
 		}
-		
-		
-		return groups;
+		return instances;
 	}
 	
-	List<MergeSummary> batchReadSummary(File folder){
-		List<MergeSummary> summaries = new ArrayList<>();
+	
+	/**
+	 * key : topicId - annotator
+	 * value : summary
+	 * @param folder
+	 * @return
+	 */
+	Map<String, String> batchReadSummary(File folder){
+		Map<String, String> summaries = new HashMap<>();
 		for(File file : folder.listFiles()){
 			try {
-				MergeSummary ms = new MergeSummary();
 				String name = file.getName();
 				//D1401_TRAIN.A.ann
 				String[] tmps = name.split("\\.");
 				String topicID = tmps[0];
 				String annotator = tmps[1];
 				String readFileToString = FileUtils.readFileToString(file);
-				ms.annotator = annotator;
-				ms.content = readFileToString;
-				ms.topicId = topicID;
-				summaries.add(ms);
+				String key = generateSummaryKey(topicID, annotator);
+				summaries.put(key, readFileToString);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -84,14 +148,23 @@ public class ParseFromDataAnn {
 		return summaries;
 	}
 	
+	/**
+	 * 生成摘要文件夹的key，便于快速查找对应topic和annotator的summary
+	 * @param topicId
+	 * @param annotator
+	 * @return
+	 */
+	private String generateSummaryKey(String topicId, String annotator){
+		return topicId + "-" + annotator;
+	}
 
 	/**
 	 * 读取全文
 	 * @param folder
 	 * @return
 	 */
-	List<Paper> batchReadOriginFile(File folder){
-		List<Paper> papers = new ArrayList<>();
+	Map<String, Paper> batchReadOriginFile(File folder){
+		Map<String, Paper> papers = new HashMap<>();
 		for(File file : folder.listFiles()){
 			String name = file.getName();
 			if(!name.endsWith(".txt")){
@@ -102,7 +175,7 @@ public class ParseFromDataAnn {
 				Paper paper = new Paper();
 				paper.fileName = name;
 				paper.wholeText = readFileToString; 
-				papers.add(paper);
+				papers.put(name, paper);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -134,22 +207,22 @@ public class ParseFromDataAnn {
 		}
 		for (String line : array) {
 			Map<String, String> map = new HashMap<>();
-			System.out.println(line);
-			System.out.println("----");
+//			System.out.println(line);
+//			System.out.println("----");
 			String[] tmps = line.split("\\|");
 			for (String tmp : tmps) {
 				String key = tmp.substring(0, tmp.indexOf(":")).trim().replaceAll(" ", "_");
 				String value = tmp.substring(tmp.indexOf(":") + 1).trim();
-				logger.info("key : {}, value : {}", key, value);
+//				logger.info("key : {}, value : {}", key, value);
 				map.put(key, value);
 			}
 			Citantion ci = map2Citantion(map);
 			citantions.add(ci);
 		}
 		
-		for(Citantion ci : citantions){
-			logger.info(ci.toString());
-		}
+//		for(Citantion ci : citantions){
+//			logger.info(ci.toString());
+//		}
 		
 		return citantions;
 	}
@@ -158,6 +231,7 @@ public class ParseFromDataAnn {
 		citantion.topicId = map.get("Topic_ID");
 		citantion.annotator = map.get("Annotator");
 		citantion.facet = map.get("Discourse_Facet");
+		citantion.citanceNumber = Integer.parseInt(map.get("Citance_Number"));
 		
 		citantion.referenceText = map.get("Reference_Text");
 		citantion.referenceOffset = map.get("Reference_Offset");

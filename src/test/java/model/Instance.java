@@ -5,11 +5,8 @@ import java.util.List;
 public class Instance {
 
 	public int id;
-	public String summary;
-	public String annotator;
-	public Paper RP;
-	public List<Paper> CPs;
-	public List<Citantion> citantions;
+	public List<PaperInstance> paperInstances;
+	public List<SummaryInstance> summaryInstances;
 	
 	public int getId() {
 		return id;
@@ -17,28 +14,17 @@ public class Instance {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public String getSummary() {
-		return summary;
+	public List<PaperInstance> getPaperInstances() {
+		return paperInstances;
 	}
-	public void setSummary(String summary) {
-		this.summary = summary;
+	public void setPaperInstances(List<PaperInstance> paperInstances) {
+		this.paperInstances = paperInstances;
 	}
-	public String getAnnotator() {
-		return annotator;
+	public List<SummaryInstance> getSummaryInstances() {
+		return summaryInstances;
 	}
-	public void setAnnotator(String annotator) {
-		this.annotator = annotator;
+	public void setSummaryInstances(List<SummaryInstance> summaryInstances) {
+		this.summaryInstances = summaryInstances;
 	}
-	public Paper getRP() {
-		return RP;
-	}
-	public void setRP(Paper rP) {
-		RP = rP;
-	}
-	public List<Paper> getCPs() {
-		return CPs;
-	}
-	public void setCPs(List<Paper> cPs) {
-		CPs = cPs;
-	}
+	
 }
