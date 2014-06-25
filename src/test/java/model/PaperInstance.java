@@ -11,7 +11,7 @@ import java.util.List;
 public class PaperInstance {
 
 	public int id;
-	public int citantionNumber;
+	public String citantionMarker;
 	public Paper RP;
 	public List<Citantion> citantions;
 	

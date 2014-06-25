@@ -18,6 +18,8 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import utils.Utils;
+
 public class ParseFromDataAnn {
 	static Logger logger = LoggerFactory.getLogger(ParseFromDataAnn.class);
 
@@ -27,12 +29,19 @@ public class ParseFromDataAnn {
 		pfda.batchParse(rootPath);
 	}
 	
+	public static List<Instance> loadDataSet(){
+		String path = Utils.loadPath();
+		List<Instance> batchParse = batchParse(path);
+		return batchParse;
+	}
+	
+	
 	/**
 	 * 输入根路径（data）
 	 * @param folder
 	 * @return
 	 */
-	public List<Instance> batchParse(String dataPath){//data
+	public static List<Instance> batchParse(String dataPath){//data
 		List<Instance> instances = new ArrayList<>();
 		File rootFolder = new File(dataPath);
 		for(File subFolder : rootFolder.listFiles()){//tran1
@@ -67,7 +76,7 @@ public class ParseFromDataAnn {
 			Map<String, List<Citantion>> eachCPCitantions = new HashMap<>();
 			for(List<Citantion> citantions : originGroups){
 				for(Citantion citantion : citantions){
-					String key = citantion.getCP().fileName+"-"+citantion.getRP().fileName+"-"+citantion.citanceNumber;
+					String key = citantion.getCP().fileName+"-"+citantion.getRP().fileName+"-"+citantion.citationMarker;
 					List<Citantion> current = eachCPCitantions.get(key);
 					if(current == null){
 						current = new ArrayList<>();
@@ -86,9 +95,10 @@ public class ParseFromDataAnn {
 
 				PaperInstance paperInstance = new PaperInstance();
 				paperInstance.citantions = citantions;
-				paperInstance.citantionNumber = citantions.get(0).citanceNumber;
+				paperInstance.citantionMarker = citantions.get(0).citationMarker;
 				String rpFile = citantions.get(0).RP.fileName;
 				Paper rp = papers.get(rpFile);
+				rp.shortText = citantions.get(0).referenceText;
 				paperInstance.RP = rp;
 				paperInstances.add(paperInstance);
 				newGroups.add(citantions);
@@ -129,7 +139,7 @@ public class ParseFromDataAnn {
 	 * @param folder
 	 * @return
 	 */
-	Map<String, String> batchReadSummary(File folder){
+	static  Map<String, String> batchReadSummary(File folder){
 		Map<String, String> summaries = new HashMap<>();
 		for(File file : folder.listFiles()){
 			try {
@@ -154,7 +164,7 @@ public class ParseFromDataAnn {
 	 * @param annotator
 	 * @return
 	 */
-	private String generateSummaryKey(String topicId, String annotator){
+	private static String generateSummaryKey(String topicId, String annotator){
 		return topicId + "-" + annotator;
 	}
 
@@ -163,7 +173,7 @@ public class ParseFromDataAnn {
 	 * @param folder
 	 * @return
 	 */
-	Map<String, Paper> batchReadOriginFile(File folder){
+	static Map<String, Paper> batchReadOriginFile(File folder){
 		Map<String, Paper> papers = new HashMap<>();
 		for(File file : folder.listFiles()){
 			String name = file.getName();
@@ -189,7 +199,7 @@ public class ParseFromDataAnn {
 		parseCitantionFile(file);
 	}
 
-	List<Citantion> parseCitantionFile(File file) {
+	static List<Citantion> parseCitantionFile(File file) {
 		List<Citantion> citantions = new ArrayList<>();
 		List<String> array = new ArrayList<>();
 		try {
@@ -226,12 +236,12 @@ public class ParseFromDataAnn {
 		
 		return citantions;
 	}
-	private Citantion map2Citantion(Map<String, String> map){
+	private static Citantion map2Citantion(Map<String, String> map){
 		Citantion citantion = new Citantion();
 		citantion.topicId = map.get("Topic_ID");
 		citantion.annotator = map.get("Annotator");
 		citantion.facet = map.get("Discourse_Facet");
-		citantion.citanceNumber = Integer.parseInt(map.get("Citance_Number"));
+//		citantion.citanceNumber = Integer.parseInt(map.get("Citance_Number"));//没啥用
 		
 		citantion.referenceText = map.get("Reference_Text");
 		citantion.referenceOffset = map.get("Reference_Offset");
@@ -247,10 +257,3 @@ public class ParseFromDataAnn {
 		return citantion;
 	}
 }
-class MergeSummary{
-	public String annotator;
-	public String topicId;
-	public String content;
-	
-}
-
