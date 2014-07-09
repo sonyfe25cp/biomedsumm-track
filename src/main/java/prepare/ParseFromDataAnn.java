@@ -25,7 +25,7 @@ public class ParseFromDataAnn {
 
 	public static void main(String[] args) {
 		ParseFromDataAnn pfda = new ParseFromDataAnn();
-		String rootPath = "/Users/omar/data/TAC_2014_BiomedSumm_Training_Data/data";
+		String rootPath = Utils.loadPath();
 		pfda.batchParse(rootPath);
 	}
 	
