@@ -20,6 +20,11 @@ import org.slf4j.LoggerFactory;
 
 import utils.Utils;
 
+/**
+ * @author Chen Jie
+ *
+ * Jul 9, 2014
+ */
 public class ParseFromDataAnn {
 	static Logger logger = LoggerFactory.getLogger(ParseFromDataAnn.class);
 
@@ -193,11 +198,12 @@ public class ParseFromDataAnn {
 		return papers;
 	}
 	
-	void batch() {
-		String path = "/home/coder/data/TAC_2014_BiomedSumm_Training_Data/data/D1401_TRAIN/Annotation/D1401_TRAIN.A.ann.txt";
-		File file = new File(path);
-		parseCitantionFile(file);
-	}
+//	void batch() {
+//		String dataFolder = Utils.loadPath();
+//		String path = dataFolder + "/D1401_TRAIN/Annotation/D1401_TRAIN.A.ann.txt";
+//		File file = new File(path);
+//		parseCitantionFile(file);
+//	}
 
 	static List<Citantion> parseCitantionFile(File file) {
 		List<Citantion> citantions = new ArrayList<>();

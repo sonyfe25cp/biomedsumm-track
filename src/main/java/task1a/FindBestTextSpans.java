@@ -22,7 +22,13 @@ import prepare.ParseFromDataAnn;
 public class FindBestTextSpans {
 	static Logger logger = LoggerFactory.getLogger(FindBestTextSpans.class);
 
-	static List<PaperInstance> instances = new ArrayList<>();
+	private static List<PaperInstance> instances = new ArrayList<>();
+	
+	
+	public static List<PaperInstance> getInstances() {
+		return instances;
+	}
+
 	static{
 		List<Instance> complete = ParseFromDataAnn.loadDataSet();
 		for(Instance instance : complete){
@@ -31,21 +37,21 @@ public class FindBestTextSpans {
 	}
 	
 	public static void main(String[] args) {
-		FindBestTextSpans.prepare();
+		FindBestTextSpans.debug();
 	}
 	
-	static void prepare(){
+	static void debug(){
 		for(PaperInstance instance : instances){
-			compareCitantionAndReferSpan(instance);
+			debugPaperInstance(instance);
 		}
 		logger.info("样本共{}个", instances.size());
 	}
 
 	/**
-	 * 对比引用文与原文
+	 * 查看解析结果
 	 * @param instance
 	 */
-	static void compareCitantionAndReferSpan(PaperInstance instance) {
+	static void debugPaperInstance(PaperInstance instance) {
 		Paper rp = instance.RP;
 		String text = rp.wholeText;
 		String spanText = rp.shortText;
