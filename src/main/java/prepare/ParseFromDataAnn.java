@@ -18,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import utils.DataSetUtils;
 import utils.Utils;
 
 /**
@@ -187,9 +188,11 @@ public class ParseFromDataAnn {
 			}
 			try {
 				String readFileToString = FileUtils.readFileToString(file);
+				String readWhole = readFileToString;
 				Paper paper = new Paper();
 				paper.fileName = name;
-				paper.wholeText = readFileToString; 
+				paper.wholeText = readWhole;
+				paper.originText = readFileToString;
 				papers.put(name, paper);
 			} catch (IOException e) {
 				e.printStackTrace();

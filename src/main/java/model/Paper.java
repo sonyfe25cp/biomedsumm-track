@@ -7,6 +7,7 @@ public class Paper {
 	public String fileName;
 	public String shortText;
 	public String wholeText;
+	public String originText;
 	
 	
 	public Paper(String fileName) {
@@ -39,6 +40,12 @@ public class Paper {
 	}
 	public void setWholeText(String wholeText) {
 		this.wholeText = wholeText;
+	}
+	public String getOriginText() {
+		return originText;
+	}
+	public void setOriginText(String originText) {
+		this.originText = originText;
 	}
 	
 	

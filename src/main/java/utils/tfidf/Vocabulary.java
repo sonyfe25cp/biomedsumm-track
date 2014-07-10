@@ -143,11 +143,14 @@ public class Vocabulary {
             logger.info("重新打开输入，需要再次结束才可以继续使用");
             overFlag = false;
         }
+        if(text == null || text.length() == 0){
+        	return;
+        }
         int pos = 0;
-        Map<String, Integer> subMapForUnit = new HashMap<>();
 //        List<Term> terms = ToAnalysis.parse(text);
 //        for (Term term : terms) {
 //            String word = term.getName();
+        Map<String, Integer> subMapForUnit = new HashMap<>();
         String[] words  = text.split(" ");
         for(String word : words){
             //for pos

@@ -1,5 +1,6 @@
 package utils;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +9,29 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
+
 public class Utils {
 
+    public static final String getResouce(String name) {
+        try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(name)) {
+            return IOUtils.toString(is);
+        } catch (IOException e) {
+            throw new RuntimeException("not found " + name, e);
+        }
+    }
+    
+    public static final List<String> getResourceList(String name){
+        InputStream is = Utils.class.getClassLoader().getResourceAsStream(name);
+        List<String> lines = null;
+        try {
+            lines = IOUtils.readLines(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lines;
+    }
+	
+	
 	/**
 	 * 返回数据文件夹路径
 	 * 
