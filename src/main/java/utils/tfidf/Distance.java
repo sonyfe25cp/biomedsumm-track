@@ -43,4 +43,22 @@ public class Distance {
         }
         return res;
     }
+    public static double euler(double[] feature, double[] feature2) {
+        if(feature.length != feature2.length){
+            logger.error("euler : length not match");
+            System.exit(0);
+        }
+        double result = 0;
+        for(int i = 0; i< feature.length; i ++){
+            double x1 = feature[i];
+            double x2 = feature2[i];
+            double x = x2 * x2 - x1 * x1;
+            if(x < 0){
+                x = 0-x;
+            }
+            double tmp = Math.sqrt(x);
+            result += tmp;
+        }
+        return result;
+    }
 }
