@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import utils.tfidf.Distance;
 import utils.tfidf.Similarity;
 
-
+//推荐距离选择:使得平均每个点的邻居数为所有点的1%-2%.
 public class NDBS {
     static Logger logger = LoggerFactory.getLogger(NDBS.class);
     private double radius = 1;
@@ -80,8 +80,9 @@ public class NDBS {
             }
         }
         
-        logger.info("minR : {}, maxR :{}", minR, maxR);
-        radius = (minR + maxR) /2 ;
+        chooseRightRadius();
+        logger.info("minR : {}, maxR :{}, radius : {}", new String[]{minR+"", maxR+"", radius+""});
+//        radius = (minR + maxR) /2 ;
         
         for (Sample sample : samples) {
             double dens = density(sample);
@@ -108,6 +109,29 @@ public class NDBS {
         }
     }
 
+    private void chooseRightRadius(){
+    	logger.info("调整超参数ing..............");
+    	double step = (maxR - minR )/similarities.size();
+
+    	double low = 0.01 * samples.size();
+    	double high = 0.02 * samples.size();
+    	
+    	for(double tmp  = minR ; tmp < maxR; tmp = tmp + step){
+    		radius = tmp;
+    		int count = 0;
+    		for(Sample sample : samples){
+    			int density = density(sample);
+    			count += density;
+    		}
+    		double average = (double)count / samples.size();
+    		logger.info("半径: {}, 平均密度: {}", radius, average);
+    		if( average > low && average < high){
+    			logger.info("合适的半径是 {}, 平均密度为 : {}", radius, average);
+    			break;
+    		}
+    	}
+    }
+    
     private double distance(Sample sampleA, Sample sampleB) {
         
         double distance = Distance.euler(sampleA.feature, sampleB.feature);
@@ -139,7 +163,7 @@ public class NDBS {
      * @param sample
      * @return
      */
-    private double density(Sample sample) {
+    private int density(Sample sample) {
         String name = sample.name;
         int count = 0;
         for (Similarity similarity : similarities) {
@@ -170,7 +194,9 @@ public class NDBS {
         public int compareTo(Sample o) {
             if (density > o.density) {
                 return 1;
-            } else {
+            }else if(density == o.density){
+            	return 0;
+            }else {
                 return -1;
             }
         }
