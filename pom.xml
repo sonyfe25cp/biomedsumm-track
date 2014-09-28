@@ -55,10 +55,16 @@
 			<version>3.6.2</version>
 		</dependency>
 		<dependency>
-		    <groupId>edu.stanford.nlp</groupId>
-		    <artifactId>stanford-parser</artifactId>
-		    <version>3.3.1</version>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>stanford-parser</artifactId>
+			<version>3.3.1</version>
 		</dependency>
+		<dependency>
+			<groupId>cn.techwolf.data</groupId>
+			<artifactId>data-utils</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<resources>
