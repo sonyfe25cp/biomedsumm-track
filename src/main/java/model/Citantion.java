@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Map;
+
 public class Citantion {
 
 	public int id;
@@ -16,8 +18,10 @@ public class Citantion {
 	public String citationOffset;
 	public String citationText;//引用
 	
-	public String referenceOffset;
-	public String referenceText;//可能的出处
+//	public String referenceOffset;
+//	public String referenceText;//可能的出处
+	
+	public Map<String, String> referenceMap;//offset vs text
 	
 	public int getId() {
 		return id;
@@ -79,18 +83,18 @@ public class Citantion {
 	public void setCitationText(String citationText) {
 		this.citationText = citationText;
 	}
-	public String getReferenceOffset() {
-		return referenceOffset;
-	}
-	public void setReferenceOffset(String referenceOffset) {
-		this.referenceOffset = referenceOffset;
-	}
-	public String getReferenceText() {
-		return referenceText;
-	}
-	public void setReferenceText(String referenceText) {
-		this.referenceText = referenceText;
-	}
+//	public String getReferenceOffset() {
+//		return referenceOffset;
+//	}
+//	public void setReferenceOffset(String referenceOffset) {
+//		this.referenceOffset = referenceOffset;
+//	}
+//	public String getReferenceText() {
+//		return referenceText;
+//	}
+//	public void setReferenceText(String referenceText) {
+//		this.referenceText = referenceText;
+//	}
 //	public int getCitanceNumber() {
 //		return citanceNumber;
 //	}
@@ -108,16 +112,23 @@ public class Citantion {
 //				+ ", referenceOffset=" + referenceOffset + ", referenceText="
 //				+ referenceText + "]";
 //	}
-	@Override
-	public String toString() {
-		return "Citantion [id=" + id + ", topicId=" + topicId + ", RP=" + RP
-				+ ", CP=" + CP + ", annotator=" + annotator + ", facet="
-				+ facet + ", citationMarkerOffset=" + citationMarkerOffset
-				+ ", citationMarker=" + citationMarker + ", citationOffset="
-				+ citationOffset + ", citationText=" + citationText
-				+ ", referenceOffset=" + referenceOffset + ", referenceText="
-				+ referenceText + "]";
-	}
-	
+    @Override
+    public String toString() {
+        return "Citantion [id=" + id + ", topicId=" + topicId + ", RP=" + RP + ", CP=" + CP
+                + ", annotator=" + annotator + ", facet=" + facet + ", citationMarkerOffset="
+                + citationMarkerOffset + ", citationMarker=" + citationMarker + ", citationOffset="
+                + citationOffset + ", citationText=" + citationText + ", referenceMap="
+                + referenceMap + "]";
+    }
+    
+    public Map<String, String> getReferenceMap() {
+        return referenceMap;
+    }
+    
+    public void setReferenceMap(Map<String, String> referenceMap) {
+        this.referenceMap = referenceMap;
+    }
+
+    
 	
 }

@@ -1,11 +1,14 @@
 package model;
 
+import java.util.List;
+import java.util.Set;
+
 public class Paper {
 	
 
 	public int id;
 	public String fileName;
-	public String shortText;
+	public Set<String> shortTexts;
 	public String wholeText;
 	public String originText;
 	
@@ -29,12 +32,6 @@ public class Paper {
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
-	public String getShortText() {
-		return shortText;
-	}
-	public void setShortText(String shortText) {
-		this.shortText = shortText;
-	}
 	public String getWholeText() {
 		return wholeText;
 	}
@@ -47,6 +44,15 @@ public class Paper {
 	public void setOriginText(String originText) {
 		this.originText = originText;
 	}
+    
+    public Set<String> getShortTexts() {
+        return shortTexts;
+    }
+    
+    public void setShortTexts(Set<String> shortTexts) {
+        this.shortTexts = shortTexts;
+    }
+    
 	
 	
 	

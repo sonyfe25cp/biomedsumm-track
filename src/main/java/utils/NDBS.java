@@ -12,8 +12,8 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import utils.tfidf.Distance;
-import utils.tfidf.Similarity;
+import cn.techwolf.data.utils.vocabulary.Distance;
+import cn.techwolf.data.utils.vocabulary.Similarity;
 
 //推荐距离选择:使得平均每个点的邻居数为所有点的1%-2%.
 public class NDBS {

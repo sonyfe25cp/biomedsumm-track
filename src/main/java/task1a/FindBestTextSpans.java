@@ -2,6 +2,7 @@ package task1a;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import model.Citantion;
 import model.Instance;
@@ -54,13 +55,17 @@ public class FindBestTextSpans {
 	static void debugPaperInstance(PaperInstance instance) {
 		Paper rp = instance.RP;
 		String text = rp.wholeText;
-		String spanText = rp.shortText;
+//		String spanText = rp.shortText;
+		Set<String> shortTexts = rp.getShortTexts();
 		List<Citantion> citantions = instance.citantions;
 		for(Citantion citantion : citantions){
 			String citationText = citantion.citationText;
 			logger.info("citationText: {}", citationText);
 			logger.info(" -- ");
-			logger.info("referText: {}", spanText);
+//			logger.info("referText: {}", spanText);
+			for(String str : shortTexts){
+			    logger.info("referText: {}", str);
+			}
 			logger.info(" -- ");
 			logger.info("annotator: {}", citantion.annotator);
 			logger.info(" -- ");

@@ -44,6 +44,7 @@ public class Utils {
 			List<String> readLines = IOUtils.readLines(is);
 			if (readLines.size() == 2) {
 				path = readLines.get(1);
+				System.out.println(path);
 			}
 		} catch (Exception ignore) {
 			System.err.println("Path error about the dataset");

@@ -3,10 +3,14 @@ package prepare;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import model.Citantion;
 import model.Instance;
@@ -18,7 +22,6 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import utils.DataSetUtils;
 import utils.Utils;
 
 /**
@@ -61,12 +64,20 @@ public class ParseFromDataAnn {
 			String topicId = subFolder.getName();//任务号
 			for(File diffFolder : subFolder.listFiles()){//summary,pdf,ann,
 				String folderName = diffFolder.getName();
+				logger.info("begin to parse {} -- {}", topicId, folderName);
 				switch(folderName){
 				case "Annotation":
 					for(File differentPersonAnn : diffFolder.listFiles()){
+					    if(differentPersonAnn.getName().equals(".DS_Store")){
+					        continue;
+					    }
 						List<Citantion> onePerson = parseCitantionFile(differentPersonAnn);
+						if(onePerson.size() == 0){
+						    logger.error("{} error ", differentPersonAnn.getName());
+						}
 						originGroups.add(onePerson);
 					}
+					logger.info("originGroup.size: {}", originGroups.size());
 					break;
 				case "Documents_PDF":
 					break;
@@ -76,6 +87,8 @@ public class ParseFromDataAnn {
 				case "Summary":
 					summaries = batchReadSummary(diffFolder);
 					break;
+				default :
+				    break;
 				}
 			}
 			//regroup citantion
@@ -104,7 +117,17 @@ public class ParseFromDataAnn {
 				paperInstance.citantionMarker = citantions.get(0).citationMarker;
 				String rpFile = citantions.get(0).RP.fileName;
 				Paper rp = papers.get(rpFile);
-				rp.shortText = citantions.get(0).referenceText;
+//				rp.shortText = citantions.get(0).referenceText;
+				Set<String> referenceSet = new HashSet<>();
+				for(Citantion citantion : citantions){
+				    Map<String, String> referenceMap = citantion.getReferenceMap();
+				    for(Entry<String, String> tmpEntry : referenceMap.entrySet()){
+				        String referText = tmpEntry.getValue();
+				        referenceSet.add(referText.trim());
+				    }
+				}
+				Set<String> finedSet = pureSet(referenceSet);
+				rp.shortTexts = finedSet;
 				paperInstance.RP = rp;
 				paperInstances.add(paperInstance);
 				newGroups.add(citantions);
@@ -114,6 +137,7 @@ public class ParseFromDataAnn {
 			
 			List<SummaryInstance> summaryInstances = new ArrayList<>();
 			for(List<Citantion> citantions : originGroups){
+//			    logger.info("citantions .size {}", citantions.size());
 				SummaryInstance summaryInstance = new SummaryInstance();
 				summaryInstance.annotator = citantions.get(0).annotator;
 				summaryInstance.citantions = citantions;
@@ -136,6 +160,46 @@ public class ParseFromDataAnn {
 			instances.add(instance);
 		}
 		return instances;
+	}
+	
+	static Set<String> pureSet(Set<String> origin){
+	    Set<String> result = new HashSet<>();
+	    List<String> array = new ArrayList<>(origin);
+	    Collections.sort(array, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                if(o1.length() >= o2.length()){
+                    return -1;
+                }else{
+                    return 1;
+                }
+            }
+	    });
+	    
+	    for(int i = 0; i < array.size(); i++){
+	        String first = array.get(i);
+//	        logger.info("first ====== : {}", first);
+	        boolean flag = true;
+	        for(int j = i+1; j < array.size(); j++){
+	            String second = array.get(j);
+	            if(first.contains(second)){
+	                flag = false;
+	            }
+	        }
+	        if(flag){
+	            result.add(first);
+	        }
+	    }
+	    
+//	    for(String tmp : result){
+//	        logger.info("re ---------- {}", tmp);
+//	    }
+//	    if(result.size() != array.size()){
+//	        logger.error("000000000000000000000000000000000000");
+//	    }
+	    
+	    
+	    return result;
 	}
 	
 	
@@ -233,30 +297,64 @@ public class ParseFromDataAnn {
 				String key = tmp.substring(0, tmp.indexOf(":")).trim().replaceAll(" ", "_");
 				String value = tmp.substring(tmp.indexOf(":") + 1).trim();
 //				logger.info("key : {}, value : {}", key, value);
+				
+				if(key.equals("Reference_offset")){
+				    key = "Reference_Offset";
+				}
 				map.put(key, value);
 			}
+			
 			Citantion ci = map2Citantion(map);
 			citantions.add(ci);
 		}
 		
-//		for(Citantion ci : citantions){
-//			logger.info(ci.toString());
-//		}
-		
 		return citantions;
 	}
 	private static Citantion map2Citantion(Map<String, String> map){
+	    
 		Citantion citantion = new Citantion();
 		citantion.topicId = map.get("Topic_ID");
 		citantion.annotator = map.get("Annotator");
 		citantion.facet = map.get("Discourse_Facet");
 //		citantion.citanceNumber = Integer.parseInt(map.get("Citance_Number"));//没啥用
 		
-		citantion.referenceText = map.get("Reference_Text");
-		citantion.referenceOffset = map.get("Reference_Offset");
+		String referenceText = map.get("Reference_Text");
+//		citantion.referenceText = referenceText;
+//		logger.info("referenceText: {}", referenceText);
+		
+		String referenceOffset = map.get("Reference_Offset").replaceAll("[\\['\\]]", "");
+//		citantion.referenceOffset = referenceOffset;
+		
+		Map<String, String> referenceMap = new HashMap<>();
+		if(referenceOffset.contains(",")){
+//		    logger.info("referenceOffset: {}", referenceOffset);
+		    String[] split = referenceOffset.split(",");
+		    String[] textSplit = referenceText.split("\\.\\.\\.");
+		    if(split.length != textSplit.length){
+		        logger.error("**********************");
+		        
+//		        logger.info("split.size: {}", split.length);
+//		        logger.info("textSplit.size: {}", textSplit.length);
+//		        logger.info(referenceText);
+		        
+		    }
+		    for(int i = 0; i < split.length; i++){
+		        String offset = split[i];
+		        String textOffset = textSplit[i];
+		        referenceMap.put(offset, textOffset);
+		    }
+		}else{
+		    referenceMap.put(referenceOffset, referenceText);
+//		    logger.info("referenceOffset ---- {}", referenceOffset);
+		}
+		
+		citantion.referenceMap = referenceMap;
+		
+		
 		
 		citantion.citationText = map.get("Citation_Text");
 		citantion.citationOffset = map.get("Citation_Offset");
+		
 		citantion.citationMarkerOffset = map.get("Citation_Marker_Offset");
 		citantion.citationMarker = map.get("Citation_Marker");
 		

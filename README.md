@@ -28,7 +28,25 @@ biomedsumm-track
 		
 		实验证明:cp的句子跟引用的rp句子上没有相似度的直接关系,大部分的cosine相似度都很低.
 		FindRelationsByCompare.compareLabel	
+		
+		key words?
 	
+
+
+1. 对同一个CP，拿出所有CP->RP,标示 正例和负例，形成pair
+
+2. 对每一组抽取特征
+
+	a. 长度的abs
+	b. 共同词的个数 / Jaccard相似度
+	c. cos距离
+	
+	distance = lambda f1 + lambda f2 + lambda cos(A,B) 
+	
+3. 损失函数 f = d(正例) + \sum frac{1}{d(负例)}
+
+
+
 
 ###task1b方法
 

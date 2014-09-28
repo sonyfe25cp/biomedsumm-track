@@ -26,14 +26,14 @@ public class LanguageUtils {
 	 * @param text
 	 * @return
 	 */
-	public static List<String> simpleCutEnglishTextIntoSentences(String text){
-		String[] split = text.split("[\\.?!]");
-		List<String> results = new ArrayList<>(split.length);
-		for(String tmp : split){
-			results.add(tmp.trim());
-		}
-		return results;
-	}
+//	public static List<String> simpleCutEnglishTextIntoSentences(String text){
+//		String[] split = text.split("[\\.?!]");
+//		List<String> results = new ArrayList<>(split.length);
+//		for(String tmp : split){
+//			results.add(tmp.trim());
+//		}
+//		return results;
+//	}
 	
 	/**
 	 * @param text
@@ -57,7 +57,7 @@ public class LanguageUtils {
 		return sentences;
 	}
 	
-	private static List<String> cut(String text){
+	public static List<String> cut(String text){
 		DocumentPreprocessor dp = new DocumentPreprocessor(new StringReader(text));
 		List<String> sentences = new ArrayList<>();
 	    for (List sentence : dp) {
@@ -101,7 +101,7 @@ public class LanguageUtils {
 			}
 		}
 		
-		double  ratio = (double)cross / union;
+		double  ratio = (double)(cross+2) / union;
 //		logger.info("cross : {}, union : {}, ratio : {}", new String[]{cross+"", union+"", ratio+""});
 		
 //		logger.info(ratio+"");
