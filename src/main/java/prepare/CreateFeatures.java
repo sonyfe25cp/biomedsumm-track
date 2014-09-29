@@ -1,13 +1,27 @@
 package prepare;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import model.LabelSentence;
 import model.Paper;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import utils.DataSetUtils;
+import utils.MatrixUtils;
+import Jama.Matrix;
+import cn.techwolf.data.utils.vocabulary.Vocabulary;
 
 public class CreateFeatures {
 
+    static Logger logger = LoggerFactory.getLogger(CreateFeatures.class);
+    
     int lsaLength = 100;
 
     int featureLength = lsaLength + 2;
@@ -46,17 +60,31 @@ public class CreateFeatures {
         return c;
     }
 
-    Map<String, Double[]> lsaResultsMaper(String cp){
+    Map<String, Double[]> lsaResultsMaper(String cp, Paper rp){
         Map<String, Double[]>  map = new HashMap<>();
         
         
+        //create matrix about rp
+        List<LabelSentence> labelSentence = DataSetUtils.labelSentence(rp);
         
         
+        return null;
+    }
+    
+    
+    
+    
+    
+    
+    public static void main(String[] args) {
+        String text = "Given the extensive involvement of miRNA in physiology, dysregulation of miRNA expression can be associated with cancer pathobiology including oncogenesis [11], proliferation [12], epithelial-mesenchymal transition [13], metastasis [14], aberrations in metabolism [15], and angiogenesis [16], among others";
+        Vocabulary voc = new Vocabulary();
+        voc.setStopWords(true);
+        List<String> cut = voc.cut(text);
+        for(String c : cut){
+            System.err.println(c);
+        }
         
-        
-        
-        
-        return map;
     }
     
 }

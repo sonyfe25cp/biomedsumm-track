@@ -12,6 +12,9 @@ import org.apache.commons.io.IOUtils;
 
 public class Utils {
 
+    
+    public static  String EvaPoath = "/Users/omar/data/TAC/TAC_2014_BiomedSumm_Evaluation_Data/data/";
+    
     public static final String getResouce(String name) {
         try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(name)) {
             return IOUtils.toString(is);

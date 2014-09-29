@@ -57,6 +57,21 @@ public class LanguageUtils {
 		return sentences;
 	}
 	
+	public static List<String> cutTextSentences(String text){
+	    List<String> cutEnglishTextIntoSentences = cutEnglishTextIntoSentences(text);
+	    List<String> refined = new ArrayList<>();
+	    for(String str : cutEnglishTextIntoSentences){
+	        if(str.length() == 1 && str.equals("References")){
+	            logger.info("find the references~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	            break;
+	        }
+	        refined.add(str);
+	    }
+	    return refined;
+	}
+	
+	
+	
 	public static List<String> cut(String text){
 		DocumentPreprocessor dp = new DocumentPreprocessor(new StringReader(text));
 		List<String> sentences = new ArrayList<>();

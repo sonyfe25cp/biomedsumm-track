@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Set;
 
 import model.Citantion;
+import model.LabelSentence;
 import model.Paper;
 import model.PaperInstance;
+import model.SampleForCompare;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import utils.DataSetUtils;
 import utils.LanguageUtils;
 import cn.techwolf.data.utils.vocabulary.Distance;
 import cn.techwolf.data.utils.vocabulary.Vocabulary;
@@ -27,10 +30,16 @@ public class FindRelationsByCompare {
 
     List<SampleForCompare> samples = new ArrayList<>();
 
-    Vocabulary vocabulary = new Vocabulary();
+    Vocabulary vocabulary = null;
+    
+    void init(){
+        vocabulary = new Vocabulary();
+        vocabulary.setStopWords(true);
+    }
 
     public static void main(String[] args) {
         FindRelationsByCompare frb = new FindRelationsByCompare();
+        frb.init();
         frb.prepare();
         //		frb.compare();
         //		frb.compareLabel();
@@ -50,7 +59,7 @@ public class FindRelationsByCompare {
                 vocabulary.addText(rp.wholeText);
             }
 
-            List<LabelSentence> labelSentence = labelSentence(rp);
+            List<LabelSentence> labelSentence = DataSetUtils.labelSentence(rp);
 
             List<Citantion> citantions = instance.citantions;
             for (Citantion citantion : citantions) {
@@ -70,68 +79,25 @@ public class FindRelationsByCompare {
 
     int cantLabel = 0;
 
+    
     /**
-     * 把rp中的句子标一下
-     * 
-     * @param rp
-     * @return
+     * 最大化距离，得参数
      */
-    List<LabelSentence> labelSentence(Paper rp) {
-        Set<LabelSentence> labelSet = new HashSet<>();
-        Set<String> shortTexts = rp.shortTexts;
-        Set<String> found = new HashSet<>();
-        String wholeText = rp.wholeText;
-        for (String txt : rp.shortTexts) {
-            wholeText = wholeText.replace(txt, "");
-            found.add(txt);
-        }
-        List<String> rpsentences = LanguageUtils.cutEnglishTextIntoSentences(rp.wholeText);
-        here: for (String sentence : rpsentences) {
-            sentence = sentence.substring(1, sentence.length() - 2).trim();
-            LabelSentence labelSentence = new LabelSentence();
-            labelSentence.sentence = sentence;
-            for (String txt : shortTexts) {
-                if (txt.contains("3?UTR")) {//特殊符号特殊处理
-                    txt = txt.replaceAll("3\\?UTR", "3'UTR");
-                }
-                boolean simFlag = LanguageUtils.isSameSentence(sentence, txt);
-                if (simFlag || sentence.contains(txt)) {
-                    labelSentence.label = 1;
-                    found.add(txt);
-                    continue here;
-                }
-            }
-            labelSet.add(labelSentence);
-        }
-
-        for (String find : found) {
-            LabelSentence labelSentence = new LabelSentence();
-            labelSentence.sentence = find;
-            labelSentence.label = 1;
-            labelSet.add(labelSentence);
-        }
-
-        if (labelSet.size() != shortTexts.size()) {
-
-            for (String tmp : shortTexts) {
-                logger.info("label : {}", tmp);
-            }
-            logger.error("有没标出的句子:{}, 应有：{}, 总数：{}", new String[] { rp.fileName, shortTexts.size() + "", labelSet.size()+""});
-            int tc = 0;
-            for (LabelSentence tmp : labelSet) {
-                if (tmp.label == 1) {
-                    logger.info("tmp : {}", tmp.sentence);
-                    tc++;
-                }
-            }
-            logger.info("tc : {}", tc);
-
-            if (tc == shortTexts.size()) {
-                logger.info("************************************************************");
+    public void maxDistance(){
+        double dis = 0;
+        for(SampleForCompare sample : samples){
+            String cpSentence = sample.cpSentence;
+            List<LabelSentence> rpSentences = sample.rpSentences;
+            logger.info("rpSize:{}", rpSentences.size());
+            for(LabelSentence tmp : rpSentences){
+                int label = tmp.label;
+                double[] vectors = tmp.vectors;
             }
         }
-        return new ArrayList<>(labelSet);
     }
+    
+    
+    
 
     public void compare() {
         int maxLikeIsLabel = 0;
@@ -197,19 +163,7 @@ public class FindRelationsByCompare {
         logger.info("最相近句子是标注句的个数为 : {}, 总句子数: {}", maxLikeIsLabel, total);
     }
 
-    class SampleForCompare {
 
-        String cpSentence;
-
-        List<LabelSentence> rpSentences;
-    }
-
-    class LabelSentence {
-
-        String sentence;
-
-        int label;
-    }
 
     class NotFoundMatchSentenceException extends RuntimeException {
 

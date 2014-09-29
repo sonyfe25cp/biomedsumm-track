@@ -58,3 +58,11 @@ biomedsumm-track
 
 1. 根据同一个人对所有CP和RP的抽取，分析其摘要与这些span的关系，生成一个权重判断函数。
 
+
+###提交
+cm： 用cosine 计算相似度，取最大的
+tp3: 用cosine取前3
+tp5： 用cosine 取前5
+
+label：bayes相似度计算
+

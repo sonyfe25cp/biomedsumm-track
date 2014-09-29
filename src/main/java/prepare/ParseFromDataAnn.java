@@ -121,10 +121,13 @@ public class ParseFromDataAnn {
 				Set<String> referenceSet = new HashSet<>();
 				for(Citantion citantion : citantions){
 				    Map<String, String> referenceMap = citantion.getReferenceMap();
-				    for(Entry<String, String> tmpEntry : referenceMap.entrySet()){
-				        String referText = tmpEntry.getValue();
-				        referenceSet.add(referText.trim());
+				    if(referenceMap != null){
+        				    for(Entry<String, String> tmpEntry : referenceMap.entrySet()){
+        				        String referText = tmpEntry.getValue();
+        				        referenceSet.add(referText.trim());
+        				    }
 				    }
+				    citantion.RP = rp;
 				}
 				Set<String> finedSet = pureSet(referenceSet);
 				rp.shortTexts = finedSet;
@@ -151,9 +154,11 @@ public class ParseFromDataAnn {
 				}
 				summaryInstance.CPs = cps;
 				String summaryKey = generateSummaryKey(topicId, summaryInstance.annotator);
-				String summary = summaries.get(summaryKey);
-				summaryInstance.summary = summary;
-				summaryInstances.add(summaryInstance);
+				if(summaries != null){
+        				String summary = summaries.get(summaryKey);
+        				summaryInstance.summary = summary;
+        				summaryInstances.add(summaryInstance);
+				}
 			}
 			
 			instance.summaryInstances = summaryInstances;
@@ -251,7 +256,17 @@ public class ParseFromDataAnn {
 				continue;
 			}
 			try {
-				String readFileToString = FileUtils.readFileToString(file);
+				List<String> readLines = FileUtils.readLines(file);
+				StringBuilder sb = new StringBuilder();
+				for(String line : readLines){
+				    line = line.trim();
+				    if(line.equals("References")){
+		                logger.info("find the references~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		                break;
+		            }
+				    sb.append(line+"\n");
+				}
+				String readFileToString = sb.toString();
 				String readWhole = readFileToString;
 				Paper paper = new Paper();
 				paper.fileName = name;
@@ -316,41 +331,42 @@ public class ParseFromDataAnn {
 		citantion.topicId = map.get("Topic_ID");
 		citantion.annotator = map.get("Annotator");
 		citantion.facet = map.get("Discourse_Facet");
-//		citantion.citanceNumber = Integer.parseInt(map.get("Citance_Number"));//没啥用
+		citantion.citanceNumber = Integer.parseInt(map.get("Citance_Number"));//没啥用
 		
 		String referenceText = map.get("Reference_Text");
 //		citantion.referenceText = referenceText;
 //		logger.info("referenceText: {}", referenceText);
 		
-		String referenceOffset = map.get("Reference_Offset").replaceAll("[\\['\\]]", "");
-//		citantion.referenceOffset = referenceOffset;
 		
-		Map<String, String> referenceMap = new HashMap<>();
-		if(referenceOffset.contains(",")){
-//		    logger.info("referenceOffset: {}", referenceOffset);
-		    String[] split = referenceOffset.split(",");
-		    String[] textSplit = referenceText.split("\\.\\.\\.");
-		    if(split.length != textSplit.length){
-		        logger.error("**********************");
-		        
-//		        logger.info("split.size: {}", split.length);
-//		        logger.info("textSplit.size: {}", textSplit.length);
-//		        logger.info(referenceText);
-		        
-		    }
-		    for(int i = 0; i < split.length; i++){
-		        String offset = split[i];
-		        String textOffset = textSplit[i];
-		        referenceMap.put(offset, textOffset);
-		    }
-		}else{
-		    referenceMap.put(referenceOffset, referenceText);
-//		    logger.info("referenceOffset ---- {}", referenceOffset);
+		String referenceOffset = map.get("Reference_Offset");
+		if(referenceOffset != null){
+		    referenceOffset = referenceOffset.replaceAll("[\\['\\]]", "");
+    //		citantion.referenceOffset = referenceOffset;
+    		    
+    		    Map<String, String> referenceMap = new HashMap<>();
+    		    if(referenceOffset.contains(",")){
+    //		    logger.info("referenceOffset: {}", referenceOffset);
+    		        String[] split = referenceOffset.split(",");
+    		        String[] textSplit = referenceText.split("\\.\\.\\.");
+    		        if(split.length != textSplit.length){
+    		            logger.error("**********************");
+    		            
+    //		        logger.info("split.size: {}", split.length);
+    //		        logger.info("textSplit.size: {}", textSplit.length);
+    //		        logger.info(referenceText);
+    		            
+    		        }
+    		        for(int i = 0; i < split.length; i++){
+    		            String offset = split[i];
+    		            String textOffset = textSplit[i];
+    		            referenceMap.put(offset, textOffset);
+    		        }
+    		    }else{
+    		        referenceMap.put(referenceOffset, referenceText);
+    //		    logger.info("referenceOffset ---- {}", referenceOffset);
+    		    }
+    		    citantion.referenceMap = referenceMap;
 		}
-		
-		citantion.referenceMap = referenceMap;
-		
-		
 		
 		citantion.citationText = map.get("Citation_Text");
 		citantion.citationOffset = map.get("Citation_Offset");

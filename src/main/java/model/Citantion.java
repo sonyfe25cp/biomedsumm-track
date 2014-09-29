@@ -6,7 +6,7 @@ public class Citantion {
 
 	public int id;
 	public String topicId;
-//	public int citanceNumber;//序号
+	public int citanceNumber;//序号
 	public Paper RP;
 	public Paper CP;
 	public String annotator;//标注人
@@ -95,12 +95,12 @@ public class Citantion {
 //	public void setReferenceText(String referenceText) {
 //		this.referenceText = referenceText;
 //	}
-//	public int getCitanceNumber() {
-//		return citanceNumber;
-//	}
-//	public void setCitanceNumber(int citanceNumber) {
-//		this.citanceNumber = citanceNumber;
-//	}
+	public int getCitanceNumber() {
+		return citanceNumber;
+	}
+	public void setCitanceNumber(int citanceNumber) {
+		this.citanceNumber = citanceNumber;
+	}
 //	@Override
 //	public String toString() {
 //		return "Citantion [id=" + id + ", topicId=" + topicId
